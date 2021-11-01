@@ -51,7 +51,7 @@ class App(threading.Thread):
         self.round_label.grid(row=8, column=0)
         self.round_entry = Entry(self.object_frame, width=40)
         self.round_entry.grid(row=8, column=1)
-        self.test_button = Button(self.object_frame, text="테스트", width=3, height=2, command=self.date_select)
+        self.test_button = Button(self.object_frame, text="테스트", width=3, height=2, command=self.seat_select)
         self.test_button.grid(row=9, column=1)
         self.dp.mainloop()
 
@@ -96,6 +96,19 @@ class App(threading.Thread):
                 (By.XPATH, '/html/body/div/div[3]/div[1]/div/span/ul/li[' + self.round_entry.get() + ']/a'))).click()
             self.driver.switch_to.default_content()
             self.driver.find_element_by_id('LargeNextBtnImage').click()
+
+        newthread = threading.Thread(target=task)
+        newthread.start()
+
+    def seat_select(self):
+        def task():
+            self.driver.switch_to.frame(self.driver.find_element_by_name("ifrmSeat"))
+            self.driver.switch_to.frame(self.driver.find_element_by_name("ifrmSeatDetail"))
+            self.wait.until(EC.presence_of_element_located(
+                (By.CSS_SELECTOR, 'img[src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif"]')))
+            seats = self.driver.find_elements_by_css_selector(
+                'img[src="http://ticketimage.interpark.com/TMGSNAS/TMGS/G/1_90.gif"]')
+            print(len(seats))
 
         newthread = threading.Thread(target=task)
         newthread.start()
