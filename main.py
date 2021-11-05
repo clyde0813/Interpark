@@ -17,6 +17,8 @@ class App(threading.Thread):
         self.wait = WebDriverWait(self.driver, 10)
         self.url = "https://ticket.interpark.com/Gate/TPLogin.asp"
         self.driver.get(self.url)
+
+        # tkinter
         self.dp = Tk()
         self.dp.geometry("500x500")
         self.dp.title("인터파크 티케팅 프로그램")
@@ -31,7 +33,7 @@ class App(threading.Thread):
         self.pw_label.grid(row=2, column=0)
         self.pw_entry = Entry(self.object_frame, show="*", width=40)
         self.pw_entry.grid(row=2, column=1)
-        self.login_button = Button(self.object_frame, text="Login", width=3, height=2, command=self.login_go)
+        self.login_button = Button(self.object_frame, text="Login", width=3, height=2, command=self.login)
         self.login_button.grid(row=3, column=1)
         self.showcode_label = Label(self.object_frame, text="공연번호")
         self.showcode_label.grid(row=4, column=0)
@@ -53,13 +55,26 @@ class App(threading.Thread):
         self.round_entry.grid(row=8, column=1)
         self.seat_label = Label(self.object_frame, text="좌석 수")
         self.seat_label.grid(row=9, column=0)
-        self.seat_entry = Entry(self.object_frame)
+        self.seat_entry = Entry(self.object_frame, width=40)
         self.seat_entry.grid(row=9, column=1)
         self.test_button = Button(self.object_frame, text="테스트", width=3, height=2, command=self.seat_select)
         self.test_button.grid(row=10, column=1)
+        self.birth_label = Label(self.object_frame, text="생년월일")
+        self.birth_label.grid(row=11, column=0)
+        self.birth_entry = Entry(self.object_frame, width=40, show='*')
+        self.birth_entry.grid(row=11, column=1)
+        self.bank_var = IntVar(value=0)
+        self.bank_check = Checkbutton(self.object_frame, text='무통장', variable=self.bank_var)
+        self.bank_check.grid(row=12, column=0)
+        self.kakao_var = IntVar(value=0)
+        self.kakao_check = Checkbutton(self.object_frame, text='카카오', variable=self.kakao_var)
+        self.kakao_check.grid(row=12, column=1)
+        self.test2_button = Button(self.object_frame, text="테스트", width=3, height=2, command=self.payment)
+        self.test2_button.grid(row=12, column=2)
         self.dp.mainloop()
 
-    def login_go(self):
+    # 로그인 하기
+    def login(self):
         def task():
             self.driver.switch_to.frame(self.driver.find_element_by_tag_name('iframe'))
             self.driver.find_element_by_name('userId').send_keys(self.id_entry.get())
@@ -69,6 +84,7 @@ class App(threading.Thread):
         newthread = threading.Thread(target=task)
         newthread.start()
 
+    # 직링 바로가기
     def link_go(self):
         def task():
             self.driver.get('http://poticket.interpark.com/Book/BookSession.asp?GroupCode=' + self.showcode_entry.get())
@@ -76,6 +92,7 @@ class App(threading.Thread):
         newthread = threading.Thread(target=task)
         newthread.start()
 
+    # 날짜 선택
     def date_select(self):
         def task():
             while (True):
@@ -104,6 +121,7 @@ class App(threading.Thread):
         newthread = threading.Thread(target=task)
         newthread.start()
 
+    # 좌석 선택
     def seat_select(self):
         def task():
             self.driver.switch_to.default_content()
@@ -124,6 +142,48 @@ class App(threading.Thread):
             self.driver.switch_to.default_content()
             self.driver.switch_to.frame(self.driver.find_element_by_name("ifrmSeat"))
             self.driver.find_element_by_id("NextStepImage").click()
+
+        newthread = threading.Thread(target=task)
+        newthread.start()
+
+    # 결제
+    def payment(self):
+        def bank():
+            self.driver.switch_to.frame(self.driver.find_element_by_xpath('//*[@id="ifrmBookStep"]'))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Payment_22004"]/td/input'))).click()
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="BankCode"]/option[7]'))).click()
+            self.driver.switch_to.default_content()
+            self.driver.find_element_by_xpath('//*[@id="SmallNextBtnImage"]').click()
+            self.driver.switch_to.frame(self.driver.find_element_by_xpath('//*[@id="ifrmBookStep"]'))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="checkAll"]'))).click()
+            self.driver.switch_to.default_content()
+            # self.driver.find_element_by_xpath('//*[@id="LargeNextBtnImage"]').click()
+
+        def kakao():
+            self.driver.switch_to.frame(self.driver.find_element_by_xpath('//*[@id="ifrmBookStep"]'))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Payment_22084"]/td/input'))).click()
+            self.driver.switch_to.default_content()
+            self.driver.find_element_by_xpath('//*[@id="SmallNextBtnImage"]').click()
+            self.driver.switch_to.frame(self.driver.find_element_by_xpath('//*[@id="ifrmBookStep"]'))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="checkAll"]'))).click()
+            self.driver.switch_to.default_content()
+            # self.driver.find_element_by_xpath('//*[@id="LargeNextBtnImage"]').click()
+
+        def task():
+            self.driver.switch_to.default_content()
+            self.driver.find_element_by_xpath('//*[@id="SmallNextBtnImage"]').click()
+            self.driver.switch_to.frame(self.driver.find_element_by_xpath('//*[@id="ifrmBookStep"]'))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="YYMMDD"]'))).send_keys(
+                self.birth_entry.get())
+            self.driver.switch_to.default_content()
+            self.driver.find_element_by_xpath('//*[@id="SmallNextBtnImage"]').click()
+            bank2 = self.bank_var.get()
+            kakao2 = self.kakao_var.get()
+            if bank2 == 1:
+                bank()
+            elif kakao2 == 1:
+                kakao()
+
         newthread = threading.Thread(target=task)
         newthread.start()
 
