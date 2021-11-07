@@ -57,8 +57,6 @@ class App(threading.Thread):
         self.seat_label.grid(row=9, column=0)
         self.seat_entry = Entry(self.object_frame, width=40)
         self.seat_entry.grid(row=9, column=1)
-        self.test_button = Button(self.object_frame, text="테스트", width=3, height=2, command=self.seat_select)
-        self.test_button.grid(row=10, column=1)
         self.birth_label = Label(self.object_frame, text="생년월일")
         self.birth_label.grid(row=11, column=0)
         self.birth_entry = Entry(self.object_frame, width=40, show='*')
